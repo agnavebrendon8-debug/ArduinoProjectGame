@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "author": "Brendon",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": -124.2, "left": 18.6, "attrs": {} },
+    {
+      "type": "wokwi-max7219-matrix",
+      "id": "matrix1",
+      "top": 87,
+      "left": -357.36,
+      "attrs": { "chain": "4" }
+    },
+    {
+      "type": "wokwi-analog-joystick",
+      "id": "joystick1",
+      "top": 210.6,
+      "left": -311.4,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "matrix1:V+", "uno:5V", "red", [ "h19.2", "v326.4", "h-172.8" ] ],
+    [ "matrix1:GND", "uno:GND.3", "black", [ "h38.4", "v307.2", "h-182.4" ] ],
+    [ "matrix1:DIN", "uno:11", "gold", [ "h0" ] ],
+    [ "matrix1:CS", "uno:10", "blue", [ "h0" ] ],
+    [ "matrix1:CLK", "uno:13", "magenta", [ "h0" ] ],
+    [ "joystick1:GND", "uno:GND.2", "black", [ "v124.8", "h432" ] ],
+    [ "joystick1:SEL", "uno:6", "green", [ "v28.8", "h495.5" ] ],
+    [ "joystick1:VCC", "uno:5V", "red", [ "v201.6", "h441.6" ] ],
+    [ "joystick1:VERT", "uno:A0", "blue", [ "v19.2", "h537.6" ] ],
+    [ "joystick1:HORZ", "uno:A1", "gold", [ "v38.4", "h537.6" ] ]
+  ],
+  "dependencies": {}
+}
