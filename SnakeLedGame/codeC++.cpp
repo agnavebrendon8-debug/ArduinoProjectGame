@@ -14,7 +14,7 @@ LedControl matrix = LedControl(DIN , CLK , CS , nb_matrix) ;
 const int button = 6 ;
 
 const int parametre = 10 ;  
-int Speed = 500 ;
+int Speed = 200 ;
 
 const int high_lim = 800 ;
 const int min_lim = 200 ;
@@ -75,12 +75,16 @@ void move_snake(snake mysnake , Direction snakeDirection , Fruit fruit);
 void delete_point(snake mysnake);
 
 
+
+bool aMorduLeCorps(snake mysnake );
+
+
 // Fruits Manager
-Fruit createFruit();
+Fruit createFruit(snake mysnake);
 bool aMangerLeFruit(Fruit fruit , snake mysnake);
 
 
-snakeelement *create_snake(Fruit fruit);
+snakeelement *create_snake();
 point create_point(int matrice, int row , int column);
 
 void beginAnimation(LedControl matrixLed);
@@ -90,8 +94,9 @@ Direction snakeDirection =  vers_bas ;
 
 
 
-Fruit myfruit = createFruit() ;
-snake mysnake = create_snake(myfruit);
+snake mysnake = create_snake();
+Fruit myfruit = createFruit(mysnake) ;
+
 boolean partieEnCour = false ;
 
 void setup() {
@@ -136,14 +141,33 @@ void loop() {
   move_snake(mysnake , snakeDirection , myfruit);
 
 
-  delay(Speed -mysnake->taille * parametre);
+  delay(Speed);
   eteindre_tout(matrix);
+  
+  if((mysnake->tete->num_matrice == nb_matrix ))
+    mysnake->tete->num_matrice = 0 ;
+  
+  else if((mysnake->tete->num_matrice == -1 )){
+    mysnake->tete->num_matrice = nb_matrix - 1 ;
+    mysnake->tete->column = 7 ;
+  }
+  
+  else if(0 > mysnake->tete->row )
+    mysnake->tete->row = 7 ;
+  
+  else if(mysnake->tete->row > 7)
+    mysnake->tete->row  = 0 ;
 
-  if((mysnake->tete->num_matrice == nb_matrix ) ||(mysnake->tete->num_matrice == -1 ) || 0 > mysnake->tete->row || mysnake->tete->row > 7){
+  else {
+  }
+
+  if(aMorduLeCorps(mysnake)){
     endAnimation(matrix , mysnake ,myfruit);
     delay(500);
-  }  
   }
+
+  }
+
   else{
     Serial.println("Fin de la partie");
     delay(5000);
@@ -487,7 +511,7 @@ void delete_point(snake mysnake){
 }
 
 
-snakeelement *create_snake(Fruit fruit){
+snakeelement *create_snake(){
 
   snakeelement* temporysnake = malloc(sizeof(snakeelement));
   (*temporysnake).taille = 0 ;
@@ -495,7 +519,7 @@ snakeelement *create_snake(Fruit fruit){
   add_point_queue(temporysnake , 0 , 5 , 2);
   add_point_queue(temporysnake , 0 , 5 , 1);
   
-  print_snake(temporysnake , matrix , fruit);
+  // print_snake(temporysnake , matrix , fruit);
 
   return temporysnake ;
 }
@@ -523,20 +547,37 @@ void print_snake(snake mysnake, LedControl matrixLed , Fruit fruit){
 }
 
 //Creation et gestion du fruit 
-Fruit createFruit(){
+Fruit createFruit(snake mysnake){
   randomSeed(analogRead(A4));
   Fruit element = malloc(sizeof(fruitElement));
+  bool is_on_snake = true ;
 
-  element->num_matrice = random(nb_matrix);
-  element->row = random(8);
-  element->column = random(8);
+  int num_matrice , row , column ;
+
+  while(is_on_snake){
+    
+    is_on_snake = false ;
+    
+    num_matrice = random(nb_matrix);  
+    row = random(8);
+    column = random(8);
+
+    for(int i = 0 ; i < mysnake->taille ; i++){
+      if(num_matrice == mysnake->tete->num_matrice && row == mysnake->tete->row && column == mysnake->tete->column )
+        is_on_snake = true ;
+    }
+  }
+  
+  element->num_matrice = num_matrice ;
+  element->row = row;
+  element->column = column ;
 
   return element ;
 }
 
 bool aMangerLeFruit(Fruit fruit , snake mysnake){
   if(fruit->column == mysnake->tete->column && fruit->row == mysnake->tete->row && fruit->num_matrice == mysnake->tete->num_matrice){
-    Fruit tempory = createFruit() ;
+    Fruit tempory = createFruit(mysnake) ;
     fruit->column = tempory->column ;
     fruit->num_matrice = tempory->num_matrice ;
     fruit->row = tempory->row ;
@@ -607,7 +648,17 @@ void rearrange(snake mysnake){
     mysnake->tete->num_matrice = mysnake->tete->num_matrice - 1 ;
   }else{}
   Serial.println(mysnake->tete->num_matrice);
+}
+
+
+bool aMorduLeCorps(snake mysnake ){
+  point tempory = mysnake->tete->next ;
   
-    
-  
+  for(int i = 0 ; i < mysnake->taille - 1 ; i++ ){
+    if(tempory->num_matrice == mysnake->tete->num_matrice && tempory->row == mysnake->tete->row && tempory->column == mysnake->tete->column )
+    return true ;
+    tempory = tempory->next ;
+  }
+
+  return false ;
 }
